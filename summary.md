@@ -1,0 +1,76 @@
+Mango-Cardio Study
+================
+
+## Dataset
+
+- The Excel file `MANCAR_InBody_lab_10132026.xlsx` contains 231 rows
+  from 31 distinct participant IDs (long format, one row per participant
+  per visit). Variables include:
+  - Participant data:
+    - Status: `Finished` or `Dropped`
+    - Treatment equence: Control-Mango or Mango-Control
+    - Demographics: age and sex
+    - Visit number (0-7) and date
+    - Anthropometrics and body composition: height, weight, and InBody
+      measurements
+      - InBody measurements were taken at every visit
+  - Biomarkers – see the list of outcomes below
+    - Units are defined in
+      `MANCAR_InBody_lab_data dictionary_10142026.xlsx`
+    - Biomarkers were measured at visits 0 (baseline), 3 (end of phase
+      1), and 7 (end of phase 2)
+- Of the 31 participants:
+  - 15 were randomized to the Control–Mango sequence and
+  - 16 were randomized to the Mango–Control sequence
+  - One participant in the control–mango sequence and two in the
+    mango–control sequence withdrew, leaving 14 completers in each
+    sequence
+    - MANCAR24, Control-Mango, Last seen at Visit 0 (baseline)
+    - MANCAR17, Mango-Control, Last seen at Visit 1
+    - MANCAR27, Mango-Control, Last seen at Visit 3 (completed phase 1
+      only)
+
+## Outcomes
+
+- There are 17 outcomes (10 primary and 7 secondary)
+
+- Primary outcomes:
+
+  - Glycemic indicators:
+    - Fasting glucose (mg/dL)
+    - Fasting insulin (µIU/mL)
+    - HOMA-IR
+    - HgbA1c (%)
+  - Lipids
+    - Total cholesterol (mg/dL)
+    - LDL-cholesterol (mg/dL)
+    - HDL-cholesterol (mg/dL)
+    - Triglycerides (mg/dL)
+  - Oxidative stress
+    - Oxidized LDL-C (ng/mL)
+    - 8-iso-PGF2α (ng/mL) – Converted from the unit in the raw data
+
+- Secondary outcomes:
+
+  - Inflammation markers:
+    - C-reactive protein (mg/L) – Converted from the unit in the raw
+      data
+    - E-selectin (ng/mL) – Converted from the unit in the raw data
+    - ICAM-1 (ng/mL) – Converted from the unit in the raw data
+    - VCAM-1 (ng/mL) – Converted from the unit in the raw data
+  - Body composition
+    - Percent body fat (%)
+    - Body fat mass (kg)
+    - Lean body mass (kg)
+
+## Exploratory analysis
+
+- To be completed
+
+## Descriptive table at baseline
+
+- To be completed
+
+## Linear mixed models
+
+- To be completed
