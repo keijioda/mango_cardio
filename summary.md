@@ -39,7 +39,7 @@ Mango-Cardio Study
   - Glycemic indicators:
     - Fasting glucose (mg/dL)
     - Fasting insulin (µIU/mL)
-    - HOMA-IR
+    - HOMA2-IR (from Oxford calculator)
     - HgbA1c (%)
   - Lipids
     - Total cholesterol (mg/dL)
@@ -48,20 +48,22 @@ Mango-Cardio Study
     - Triglycerides (mg/dL)
   - Oxidative stress
     - Oxidized LDL-C (ng/mL)
-    - 8-iso-PGF2α (ng/mL) – Converted from the unit in the raw data
+    - 8-iso-PGF2α (ng/mL)<sup>\*</sup>
 
 - Secondary outcomes:
 
   - Inflammation markers:
-    - C-reactive protein (mg/L) – Converted from the unit in the raw
-      data
-    - E-selectin (ng/mL) – Converted from the unit in the raw data
-    - ICAM-1 (ng/mL) – Converted from the unit in the raw data
-    - VCAM-1 (ng/mL) – Converted from the unit in the raw data
+    - C-reactive protein (mg/L)<sup>\*</sup>
+    - E-selectin (ng/mL)<sup>\*</sup>
+    - ICAM-1 (ng/mL)<sup>\*</sup>
+    - VCAM-1 (ng/mL)<sup>\*</sup>
   - Body composition
     - Percent body fat (%)
     - Body fat mass (kg)
     - Lean body mass (kg)
+
+<sup>\*</sup> Converted from the units in the raw data (pg/mL, or ng/mL
+for CRP) by dividing by 1,000.
 
 ## Exploratory analysis
 
