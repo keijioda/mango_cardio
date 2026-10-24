@@ -400,6 +400,45 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
   HOMA2-IR, triglycerides, 8-iso-PGF2α, and CRP), the log ratio, log(mango / control), is shown.
   Bars are colored by treatment sequence.
   
+```{r Waterfall_primary, fig.width = 10, fig.height = 7.2}
+# Waterfall plot
+log_vars <- c("insulin", "homair", "trig", "isop", "crp")   # same as the log-scale models
+
+plot_dat <- bm_long %>%
+  filter(visit %in% c(3, 7)) %>%
+  select(partid, seq, trt, all_of(c(primary_bm, secondary_bm))) %>%
+  pivot_longer(-c(partid, seq, trt), names_to = "outcome", values_to = "value") %>%
+  pivot_wider(id_cols = c(partid, seq, outcome), names_from = trt, values_from = value) %>%
+  mutate(diff = if_else(outcome %in% log_vars, log(Mango / Control), Mango - Control),
+         partid  = parse_number(partid),
+         outcome = factor(outcome, levels = names(outcome_labels))) %>%
+  filter(!is.na(diff)) %>%
+  mutate(bar = fct_reorder(paste(outcome, partid), diff))
+
+wf_labels <- outcome_labels
+wf_labels[log_vars] <- paste0(outcome_labels[log_vars], "\nlog ratio")
+
+plot_waterfall <- function(vars, ncol = 4) {
+  plot_dat %>%
+    filter(outcome %in% vars) %>%
+    droplevels() %>%
+    ggplot(aes(x = bar, y = diff, fill = seq)) +
+    geom_col() +
+    geom_hline(yintercept = 0, linewidth = 0.3) +
+    facet_wrap(~ outcome, scales = "free", ncol = ncol,
+               labeller = as_labeller(wf_labels)) +
+    scale_x_discrete(labels = \(x) sub(".* ", "", x)) +
+    labs(x = "Participant ID", y = "Mango − Control (difference or log ratio)", fill = "Sequence") +
+    theme_bw() +
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6))
+}
+
+# Waterfall plots for primary outcomes
+plot_waterfall(primary_bm, ncol = 4)
+
+```
+ 
 * Glycemic indicators:
   * Glucose, insulin, HOMA2-IR, and HbA1c showed no consistent direction; participants were
     split roughly evenly between lower and higher values on mango (e.g., glucose 14 vs 14).
@@ -419,7 +458,14 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
 * Oxidative stress:
   * Oxidized LDL was lower on mango in 20 of 28 participants.
   * 8-iso-PGF2α showed no consistent direction.
-  
+
+```{r Waterfall_secondary, fig.width = 10, fig.height = 4.8}
+
+# Waterfall plots for secondary outcomes
+plot_waterfall(secondary_bm, ncol = 4)
+
+```
+
 * Inflammatory markers:
   * CRP was lower on mango in 21 of 28 participants; the largest positive difference was MANCAR26, with a spike at the end of the mango phase (see "Profile plots for inflammatory" section above).
 
@@ -429,39 +475,6 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
         (mango in phase 1) mostly negative, consistent with an increase in phase 2 regardless of diet (period effect).
   * Lean mass tended to be higher on mango (17 of 28).
     
-```{r Waterfall, fig.width = 10, fig.height = 12}
-# Waterfall plot
-log_vars <- c("insulin", "homair", "trig", "isop", "crp")   # same as the log-scale models
-
-plot_dat <- bm_long %>%
-  filter(visit %in% c(3, 7)) %>%
-  select(partid, seq, trt, all_of(c(primary_bm, secondary_bm))) %>%
-  pivot_longer(-c(partid, seq, trt), names_to = "outcome", values_to = "value") %>%
-  pivot_wider(id_cols = c(partid, seq, outcome), names_from = trt, values_from = value) %>%
-  mutate(diff = if_else(outcome %in% log_vars, log(Mango / Control), Mango - Control),
-         partid  = parse_number(partid),
-         outcome = factor(outcome, levels = names(outcome_labels))) %>%
-  filter(!is.na(diff)) %>%
-  mutate(bar = fct_reorder(paste(outcome, partid), diff))
-
-wf_labels <- outcome_labels
-wf_labels[log_vars] <- paste0(outcome_labels[log_vars], "\nlog ratio")
-
-p_waterfall <- ggplot(plot_dat, aes(x = bar, y = diff, fill = seq)) +
-  geom_col() +
-  geom_hline(yintercept = 0, linewidth = 0.3) +
-  facet_wrap(~ outcome, scales = "free", ncol = 4,
-             labeller = as_labeller(wf_labels)) +
-  scale_x_discrete(labels = \(x) sub(".* ", "", x)) +
-  labs(x = "Participant ID", y = "Mango − Control (difference or log ratio)", fill = "Sequence") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6))
-
-p_waterfall
-
-```
-
 ## Descriptive table at baseline
 
 * To be completed

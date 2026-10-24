@@ -211,8 +211,9 @@ for CRP) by dividing by 1,000.
   8-iso-PGF2α, and CRP), the log ratio, log(mango / control), is shown.
   Bars are colored by treatment sequence.
 
-- Glycemic indicators:
+![](summary_files/figure-gfm/Waterfall_primary-1.png)<!-- -->
 
+- Glycemic indicators:
   - Glucose, insulin, HOMA2-IR, and HbA1c showed no consistent
     direction; participants were split roughly evenly between lower and
     higher values on mango (e.g., glucose 14 vs 14).
@@ -223,29 +224,24 @@ for CRP) by dividing by 1,000.
     above). The largest insulin difference was also from MANCAR21.
   - HbA1c differences were small and discrete (0.1% steps); 6 of 28 had
     no change.
-
 - Lipids:
-
   - Total cholesterol was evenly split (14 vs 14). LDL-C tended to be
     slightly lower on mango (15 lower, 11 higher); the largest positive
     difference (+51 mg/dL) was from MANCAR31, whose LDL-C dropped during
     the control phase (see “Profile plots for lipids” section above).
   - HDL-C tended to be slightly lower on mango (17 lower, 8 higher).
   - Triglycerides tended to be higher on mango in 18 of 28 participants.
-
 - Oxidative stress:
-
   - Oxidized LDL was lower on mango in 20 of 28 participants.
   - 8-iso-PGF2α showed no consistent direction.
 
-- Inflammatory markers:
+![](summary_files/figure-gfm/Waterfall_secondary-1.png)<!-- -->
 
+- Inflammatory markers:
   - CRP was lower on mango in 21 of 28 participants; the largest
     positive difference was MANCAR26, with a spike at the end of the
     mango phase (see “Profile plots for inflammatory” section above).
-
 - Body composition:
-
   - Body fat (%) and fat mass were evenly split overall, but bars were
     largely separated by sequence:
     - Control–Mango participants (mango in phase 2) mostly had positive
@@ -253,8 +249,6 @@ for CRP) by dividing by 1,000.
       mostly negative, consistent with an increase in phase 2 regardless
       of diet (period effect).
   - Lean mass tended to be higher on mango (17 of 28).
-
-![](summary_files/figure-gfm/Waterfall-1.png)<!-- -->
 
 ## Descriptive table at baseline
 
