@@ -1,0 +1,139 @@
+---
+title: "Mango-Cardio Study: Profile plots"
+output:
+  html_document:
+    self_contained: true
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+
+
+# Load packages
+pacs <- c(
+  "tidyverse", 
+  "janitor", 
+  "readxl",
+  "plotly"
+)
+
+sapply(pacs, require, character.only = TRUE)
+
+# Read participant demog + biomarker data ---------------------------------
+
+# Read data; n.obs = 231 from 31 distinct partIDs
+# Remove variables that are not needed
+bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+  clean_names() %>% 
+  select(-matches("right|left|trunk|arm|leg|cellular|ecw|visceral|impedance|control|score|basal|smi")) %>% 
+  rename(
+    partid = part_id,
+    seq    = gr_rand,
+    height = x2_height,
+    sex    = x3_gender,
+    age    = x4_age,
+    date   = x5_test_date_time,
+    weight = x6_weight,
+    tbw    = x7_tbw_total_body_water,
+    dlm    = x10_dlm_dry_lean_mass,
+    bfm    = x11_bfm_body_fat_mass,
+    lbm    = x12_lbm_lean_body_mass,
+    smm    = x13_smm_skeletal_muscle_mass,
+    bmi    = x14_bmi_body_mass_index,
+    pbf    = x15_pbf_percent_body_fat,
+    tnfa   = tnf_alpha,
+    il_1b  = il_1_beta,
+    hdl    = hdl_cho_l,
+    isop   = x8_isoprostanglin_f2a,
+    oxldl  = oxidized_ldl
+  ) %>% 
+  mutate(
+    seq        = factor(seq, levels = c("C", "M"), labels = c("Control-Mango", "Mango-Control")),
+    sex        = factor(sex),
+    date       = as_date(dmy_hms(date)),
+    phase      = case_when(
+      visit == 0              ~ 0,
+      visit >= 1 & visit <= 3 ~ 1,
+      visit >= 4 & visit <= 7 ~ 2,
+      ),
+    phase      = factor(phase),
+    trt        = case_when(
+      phase == 0 ~ "Baseline",
+      phase == 1 & seq == "Control-Mango" ~ "Control",
+      phase == 2 & seq == "Control-Mango" ~ "Mango",
+      phase == 1 & seq == "Mango-Control" ~ "Mango",
+      phase == 2 & seq == "Mango-Control" ~ "Control",
+    ),
+    trt        = factor(trt),
+    isop       = isop       / 1000,        # Convert to ng/mL
+    crp        = crp        / 1000,        # Convert to mg/L
+    e_selectin = e_selectin / 1000,        # Convert to ng/mL
+    icam_1     = icam_1     / 1000,        # Convert to ng/mL
+    vcam_1     = vcam_1     / 1000         # Convert to ng/mL
+  ) %>% 
+  select(partid, status, seq, visit, phase, trt, everything())
+
+
+```
+
+```{r plots}
+
+# Outcome labels
+outcome_labels <- c(
+  glucose    = "Glucose (mg/dL)",
+  insulin    = "Insulin (µIU/mL)",
+  homair     = "HOMA2-IR",
+  a1c        = "HbA1c (%)",
+  chol       = "Total chol (mg/dL)",
+  ldl        = "LDL-C (mg/dL)",
+  hdl        = "HDL-C (mg/dL)",
+  trig       = "TG (mg/dL)",
+  oxldl      = "Ox-LDL (ng/mL)",
+  isop       = "8-iso-PGF2α (ng/mL)",
+  crp        = "CRP (mg/L)",
+  e_selectin = "E-selectin (ng/mL)",
+  icam_1     = "ICAM-1 (ng/mL)",
+  vcam_1     = "VCAM-1 (ng/mL)",
+  pbf        = "Body fat (%)",
+  bfm        = "Fat mass (kg)",
+  lbm        = "Lean mass (kg)"
+)
+
+vars <- names(outcome_labels)
+log_vars <- c("insulin", "homair", "isop", "crp")
+
+# plotly version of the profile plot
+plot_profile <- function(data, var, ylab = outcome_labels[[var]], log = FALSE) {
+  d <- data %>%
+    filter(visit %in% c(0, 3, 7), !is.na(.data[[var]])) %>%
+    arrange(partid, visit) %>%
+    group_by(partid) %>%
+    mutate(hover = paste0("<b>", partid, "</b> (", seq, ")<br>",
+                          paste0("Visit ", visit, ": ", signif(.data[[var]], 4),
+                                 collapse = "<br>"))) %>%
+    ungroup() %>%
+    highlight_key(~ partid)
+  
+  p <- ggplot(d, aes(x = visit, y = .data[[var]], group = partid,
+                     color = seq, text = hover)) +
+    geom_line() +
+    geom_point() +
+    facet_wrap(~ seq) +
+    scale_x_continuous(breaks = c(0, 3, 7), minor_breaks = 0:7) +
+    labs(x = "Visit", y = if (log) paste(ylab, "(log scale)") else ylab,
+         title = outcome_labels[[var]]) +
+    theme_bw() +
+    theme(legend.position = "none")
+  
+  if (log) p <- p + scale_y_log10()
+  
+  ggplotly(p, tooltip = "text") %>%
+    highlight(on = "plotly_hover", off = "plotly_doubleclick", opacityDim = 0.15)
+}
+
+htmltools::tagList(
+  map(vars, \(v) plot_profile(bm_long, v, log = v %in% log_vars))
+)
+```

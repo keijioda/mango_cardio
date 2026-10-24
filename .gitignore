@@ -41,7 +41,7 @@ vignettes/*.pdf
 .env
 
 # pkgdown site
-docs/
+# docs/
 
 # Other folders
 data/
