@@ -145,6 +145,16 @@ bm_long %>%
   summarise(across(where(is.numeric), \(x) moments::skewness(x, na.rm = TRUE))) %>% 
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Skewness")
 
+bm_long %>%
+  # filter(insulin > 100) %>% 
+  filter(partid == "MANCAR21", visit %in% c(0, 3, 7)) %>% 
+  select(partid, visit, trt, glucose, insulin, homair, a1c)
+
+bm_long %>%
+  filter(glucose > 150) %>%
+  # filter(partid == "MANCAR21", visit %in% c(0, 3, 7)) %>% 
+  select(partid, visit, trt, glucose, insulin, homair, a1c)
+
 # Descriptive tables ------------------------------------------------------
 
 baseline %>% 
@@ -249,25 +259,19 @@ plot_profile <- function(data, var, ylab = outcome_labels[[var]], log = FALSE) {
 (plot_profile(bm_long, "glucose") + plot_profile(bm_long, "insulin", log = TRUE)) /
 (plot_profile(bm_long, "homair", log = TRUE) + plot_profile(bm_long, "a1c"))
 
-bm_long %>% 
-  filter(partid == "MANCAR24") %>% 
-  # filter(partid == "MANCAR27") %>% 
-  # filter(partid == "MANCAR21") %>% 
-  # filter(partid == "MANCAR16") %>% 
-  select(partid, visit, trt, glucose, insulin, homair, a1c)
-
 # Profile plots for lipids
 (plot_profile(bm_long, "chol") + plot_profile(bm_long, "ldl")) /
 (plot_profile(bm_long, "hdl") + plot_profile(bm_long, "trig"))
 
-plot_profile(bm_long, "oxldl")
-plot_profile(bm_long, "isop", log = TRUE)
-plot_profile(bm_long, "crp", log = TRUE)
-plot_profile(bm_long, "e_selectin")
-plot_profile(bm_long, "icam_1")
-plot_profile(bm_long, "vcam_1")
-plot_profile(bm_long, "pbf")
-plot_profile(bm_long, "bfm")
+# Profile plots for oxidation
+plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
+
+# Profile plots for inflammation
+(plot_profile(bm_long, "crp", log = TRUE) + plot_profile(bm_long, "e_selectin")) /
+(plot_profile(bm_long, "icam_1") + plot_profile(bm_long, "vcam_1"))
+
+# Profile plots for body composition
+(plot_profile(bm_long, "pbf") + plot_profile(bm_long, "bfm")) /
 plot_profile(bm_long, "lbm")
 
 # plotly version of the profile plot
