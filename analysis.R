@@ -339,15 +339,20 @@ plot_dat <- bm_long %>%
 wf_labels <- outcome_labels
 wf_labels[log_vars] <- paste0(outcome_labels[log_vars], "\nlog ratio")
 
-p_waterfall <- ggplot(plot_dat, aes(x = bar, y = diff, fill = seq)) +
-  geom_col() +
-  geom_hline(yintercept = 0, linewidth = 0.3) +
-  facet_wrap(~ outcome, scales = "free", ncol = 6,
-             labeller = as_labeller(wf_labels)) +
-  scale_x_discrete(labels = \(x) sub(".* ", "", x)) +
-  labs(x = "Participant ID", y = "Mango − Control (difference or log ratio)", fill = "Sequence") +
-  theme_bw() +
-  theme(legend.position = "bottom",
-        axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6))
-
-p_waterfall
+plot_waterfall <- function(vars, ncol = 4) {
+  plot_dat %>%
+    filter(outcome %in% vars) %>%
+    droplevels() %>%
+    ggplot(aes(x = bar, y = diff, fill = seq)) +
+    geom_col() +
+    geom_hline(yintercept = 0, linewidth = 0.3) +
+    facet_wrap(~ outcome, scales = "free", ncol = ncol,
+               labeller = as_labeller(wf_labels)) +
+    scale_x_discrete(labels = \(x) sub(".* ", "", x)) +
+    labs(x = "Participant ID", y = "Mango − Control (difference or log ratio)", fill = "Sequence") +
+    theme_bw() +
+    theme(legend.position = "bottom",
+          axis.text.x = element_text(angle = 90, vjust = 0.5, hjust = 1, size = 6))
+}
+plot_waterfall(primary_bm, ncol = 4)
+plot_waterfall(secondary_bm, ncol = 4)

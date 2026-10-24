@@ -257,16 +257,19 @@ bm_long %>%
   for all outcomes (hover over a line to see a participant's values).
 
 #### Profile plots for glycemic indicators:
-* MANCAR24 (Control–Mango) had high glucose (139 mg/dL), HOMA2-IR (3.75), and HbA1c (6.8%)
-  at baseline, and then dropped out.
-* MANCAR27 (Mango–Control) had high glucose at baseline (154 mg/dL) and at visit 3 (158 mg/dL),
-  and then dropped out.
-* [**Check needed**] MANCAR21 (Mango–Control) had a spike in glucose (147 mg/dL) and insulin (119 µIU/mL) at visit 3,
-  suggesting a non-fasting sample; HOMA2-IR was not calculated for this visit (insulin above the Oxford calculator's upper limit)
-* [**Check needed**] MANCAR22 (Mango–Control) had the largest drop in glucose from Mango to Control (139 → 94 mg/dL).
-  Insulin was consistently high at all visits (38.4–50.7 µIU/mL).
-* [**Check needed**] MANCAR16 (Control–Mango) showed a steep decline in insulin (10.1 → 2.5 → 2.0 µIU/mL);
-  HOMA2-IR is missing at visits 3 and 7 because insulin was below the Oxford calculator's lower limit.
+
+* Dropouts: 
+  * MANCAR24 (Control–Mango) had high glucose (139 mg/dL), HOMA2-IR (3.75), and HbA1c (6.8%) at baseline, and then dropped out.
+  * MANCAR27 (Mango–Control) had high glucose at baseline (154 mg/dL) and at visit 3 (158 mg/dL), and then dropped out.
+  
+* [**Check needed**] MANCAR21 (Mango–Control) had a spike in glucose (147 mg/dL) and insulin (119 µIU/mL) at visit 3, suggesting a non-fasting sample
+  * HOMA2-IR was not calculated for this visit (insulin above the Oxford calculator's upper limit)
+
+* [**Check needed**] MANCAR22 (Mango–Control) had the largest drop in glucose from Mango to Control (139 → 94 mg/dL). 
+  * Insulin was consistently high at all visits (38.4–50.7 µIU/mL).
+
+* [**Check needed**] MANCAR16 (Control–Mango) showed a steep decline in insulin (10.1 → 2.5 → 2.0 µIU/mL)
+  * HOMA2-IR is missing at visits 3 and 7 because insulin was below the Oxford calculator's lower limit.
 
 ```{r profile_plot_glycemic, fig.width = 10, fig.height = 6}
 
@@ -316,21 +319,19 @@ plot_profile <- function(data, var, ylab = outcome_labels[[var]], log = FALSE) {
 ```
 
 #### Profile plots for lipids:
-* Lipid levels were generally stable within participants, particularly HDL-C;
-  no consistent pattern by treatment phase is apparent
-* MANCAR10 (Control–Mango) had the highest total cholesterol (272–283 mg/dL) and LDL-C
-  (168–185 mg/dL) throughout, and the highest triglycerides at baseline (314 mg/dL).
-* [**Check needed**] MANCAR31 (Mango–Control) showed a large drop in total cholesterol (231 → 187 mg/dL)
-  and LDL-C (172 → 121 mg/dL) from visit 3 to visit 7 (control phase)
-* [**Check needed**] MANCAR22 (Mango–Control) had a rise in total cholesterol (287 mg/dL), LDL-C (190 mg/dL),
-  and triglycerides (235 mg/dL) at visit 7 (control phase).
-* Three participants in the Mango–Control sequence had a dip in LDL-C at visit 3
-  (end of mango phase): MANCAR25 (115 → 81 → 118 mg/dL), MANCAR32 (113 → 79 → 108 mg/dL),
-  and MANCAR23 (97 → 78 → 78 mg/dL).
-* MANCAR02 (Mango–Control) had consistently high HDL-C (76–85 mg/dL).
-* Dropouts: MANCAR24 (Control–Mango) had baseline values only (total cholesterol 249 mg/dL,
-  LDL-C 159 mg/dL); MANCAR27 (Mango–Control) had high HDL-C (78 and 75 mg/dL) at baseline
-  and visit 3.
+
+* Lipid levels were generally stable within participants, particularly HDL-C
+  * No consistent pattern by treatment phase is apparent
+
+* Dropouts:
+  * MANCAR24 (Control–Mango) had high lipid values at baseline (TC 249, LDL 159, HDL 65) before dropping out
+  * MANCAR27 (Mango–Control) had high HDL-C (78 and 75 mg/dL) at baseline and visit 3
+
+* MANCAR10 (Control–Mango) had the highest TC (272–283 mg/dL) and LDL (168–185 mg/dL) throughout, and the highest triglycerides at baseline (314 mg/dL)
+  
+* [**Check needed**] MANCAR31 (Mango–Control) showed a large drop in TC (231 → 187 mg/dL) and LDL (172 → 121 mg/dL) from visit 3 to visit 7 (control phase)
+
+* [**Check needed**] MANCAR22 (Mango–Control) had a rise in TC (287 mg/dL), LDL (190 mg/dL), and TG (235 mg/dL) at visit 7 (control phase)
 
 ```{r profile_plot_lipids, fig.width = 10, fig.height = 6}
 
@@ -342,13 +343,12 @@ plot_profile <- function(data, var, ylab = outcome_labels[[var]], log = FALSE) {
 
 #### Profile plots for oxidative markers:
 
-* Oxidized LDL showed a pattern consistent with a mango effect: values decreased during
-  the mango phase and increased during the control phase in both sequences
-* Oxidized LDL levels were generally higher in the Control–Mango sequence
-* MANCAR31 (Mango–Control) had a marked decrease during the control phase (384 → 224 ng/mL),
-  in parallel with the drop in LDL-C noted above.
-* 8-iso-PGF2α showed no consistent pattern by treatment phase. MANCAR35 (Control–Mango) had
-  consistently low values (0.26–0.37 ng/mL).
+* Oxidized LDL showed a pattern consistent with a mango effect: values decreased during the mango phase and increased during the control phase in both sequences
+  * Oxidized LDL levels were generally higher in the Control–Mango sequence
+  * 8-iso-PGF2α showed no consistent pattern by treatment phase
+
+* MANCAR31 (Mango–Control) had a marked decrease in oxidized LDL during the control phase (384 → 224 ng/mL), in parallel with the drop in LDL noted above
+
 
 ```{r profile_plot_oxidation, fig.width = 10, fig.height = 3}
 
@@ -359,14 +359,21 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
 
 #### Profile plots for inflammatory markers:
 
-* [**Check needed**] CRP: MANCAR26 (Control–Mango) had a spike at visit 7 (0.80 → 9.12 mg/L), suggesting an acute inflammatory episode.
-* E-selectin: MANCAR24 (Control–Mango) had a high value at baseline (75.9 ng/mL), then dropped out.
-* ICAM-1: MANCAR02 (Mango–Control) had consistently high values (1,211–1,298 ng/mL) and
-  MANCAR05 (Control–Mango) consistently low values (~28 ng/mL); MANCAR31 (Mango–Control)
-  increased from 484 to 885 ng/mL at visit 3.
-* [**Check needed**] VCAM-1: MANCAR16 (Control–Mango) increased steadily (795 → 865 → 1,080 ng/mL);
-    MANCAR25 (Mango–Control) had a spike at visit 3 (1,140 ng/mL); MANCAR33 (Mango–Control)
-    had consistently low values (189–243 ng/mL).
+* [**Check needed**] CRP: 
+  * MANCAR26 (Control–Mango) had a spike at visit 7 (0.80 → 9.12 mg/L), suggesting an acute inflammatory episode
+
+* E-selectin: 
+  * MANCAR24 (Control–Mango) had a high value at baseline (75.9 ng/mL) before dropping out
+
+* ICAM-1: 
+  * MANCAR02 (Mango–Control) had consistently high values (1,211–1,298 ng/mL)
+  * MANCAR05 (Control–Mango) consistently low values (~28 ng/mL)
+  * MANCAR31 (Mango–Control) increased from 484 to 885 ng/mL at visit 3 (mango phase)
+  
+* [**Check needed**] VCAM-1: 
+  * MANCAR16 (Control–Mango) increased steadily (795 → 865 → 1,080 ng/mL)
+  * MANCAR25 (Mango–Control) had a spike at visit 3 (1,140 ng/mL)
+  * MANCAR33 (Mango–Control) had consistently low values (189–243 ng/mL)
 
 ```{r profile_plot_inflammation, fig.width = 10, fig.height = 6}
 
@@ -379,10 +386,12 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
 #### Profile plots for body composition:
 
 * Body fat:
-  * MANCAR27 (Mango–Control) increased during the mango phase (35.2% → 38.5%) before dropping out.
+  * MANCAR27 (Mango–Control) increased during the mango phase (35.2% → 38.5%) before dropping out
+  
 * Fat mass:
-  * MANCAR22 (Mango–Control) decreased during the control phase (48.3 → 44.3 kg).
-  * MANCAR27 (Mango–Control) increased during the mango phase (23.5 → 27.5 kg) before dropping out.
+  * MANCAR22 (Mango–Control) decreased during the control phase (48.3 → 44.3 kg)
+  * MANCAR27 (Mango–Control) increased during the mango phase (23.5 → 27.5 kg) before dropping out
+  
 * Lean mass: Very stable within participants
 
 ```{r profile_plot_body_composition, fig.width = 10, fig.height = 6}
@@ -440,26 +449,24 @@ plot_waterfall(primary_bm, ncol = 4)
 ```
  
 * Glycemic indicators:
-  * Glucose, insulin, HOMA2-IR, and HbA1c showed no consistent direction; participants were
-    split roughly evenly between lower and higher values on mango (e.g., glucose 14 vs 14).
-  * The largest positive glucose differences came from MANCAR22 (139 vs 94 mg/dL), whose glucose dropped 
-    during the control phase, and MANCAR21 (147 vs 107 mg/dL), whose end-of-mango sample was likely 
-    non-fasting (see "Profile plots for glycemic indicators" section above). 
-    The largest insulin difference was also from MANCAR21.
-  * HbA1c differences were small and discrete (0.1% steps); 6 of 28 had no change.
-  
+  * Glucose, insulin, HOMA2-IR, and HbA1c showed no consistent direction; participants were split roughly evenly between lower and higher values on mango (e.g., glucose 14 vs 14)
+  * The largest positive glucose differences came from:
+    * MANCAR22 (139 vs 94 mg/dL), whose glucose dropped during the control phase, and 
+    * MANCAR21 (147 vs 107 mg/dL), whose end-of-mango sample was likely non-fasting (see "Profile plots for glycemic indicators" section above) 
+    * The largest insulin difference was also from MANCAR21
+
 * Lipids:
-  * Total cholesterol was evenly split (14 vs 14). LDL-C tended to be slightly lower on mango
-    (15 lower, 11 higher); the largest positive difference (+51 mg/dL) was from MANCAR31, whose LDL-C dropped 
-    during the control phase (see "Profile plots for lipids" section above).
-  * HDL-C tended to be slightly lower on mango (17 lower, 8 higher).
-  * Triglycerides tended to be higher on mango in 18 of 28 participants.
+  * TC was evenly split (14 vs 14)
+  * LDL tended to be slightly lower on mango (15 lower, 11 higher)
+    * The largest positive difference (+51 mg/dL) was from MANCAR31, whose LDL-C dropped during the control phase (see "Profile plots for lipids" section above)
+  * HDL tended to be slightly lower on mango (17 lower, 8 higher)
+  * TG tended to be higher on mango in 18 of 28 participants
   
 * Oxidative stress:
-  * Oxidized LDL was lower on mango in 20 of 28 participants.
-  * 8-iso-PGF2α showed no consistent direction.
+  * Oxidized LDL was lower on mango in 20 of 28 participants
+  * 8-iso-PGF2α showed no consistent direction
 
-```{r Waterfall_secondary, fig.width = 10, fig.height = 4.8}
+```{r Waterfall_secondary, fig.width = 10, fig.height = 5.2}
 
 # Waterfall plots for secondary outcomes
 plot_waterfall(secondary_bm, ncol = 4)
@@ -467,13 +474,15 @@ plot_waterfall(secondary_bm, ncol = 4)
 ```
 
 * Inflammatory markers:
-  * CRP was lower on mango in 21 of 28 participants; the largest positive difference was MANCAR26, with a spike at the end of the mango phase (see "Profile plots for inflammatory" section above).
+  * CRP was lower on mango in 21 of 28 participants
+    * The largest positive difference in CRP was MANCAR26, with a spike at the end of the mango phase (see "Profile plots for inflammatory" section above)
 
 * Body composition:
   * Body fat (%) and fat mass were evenly split overall, but bars were largely separated by sequence: 
-      * Control–Mango participants (mango in phase 2) mostly had positive differences and Mango–Control participants 
-        (mango in phase 1) mostly negative, consistent with an increase in phase 2 regardless of diet (period effect).
-  * Lean mass tended to be higher on mango (17 of 28).
+      * Control–Mango participants mostly had positive differences and 
+      * Mango–Control participants mostly negative
+      * These are consistent with an increase in phase 2 regardless of diet (period effect)
+  * Lean mass tended to be higher on mango (17 of 28)
     
 ## Descriptive table at baseline
 
