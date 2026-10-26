@@ -266,7 +266,21 @@ for CRP) by dividing by 1,000.
 ## Descriptive table at baseline
 
 - To be completed
+- Participant characteristics at baseline by treatment sequence:
 
 ## Linear mixed models
 
+### Model descriptions
+
 - To be completed
+
+- A linear mixed model for each outcome
+
+  - Fixed-effects terms including treatment, sequence and phase
+  - Also includes a random intercept for participant
+  - Adjust for the baseline value of the outcome?
+
+- Intention-to-treat analysis including dropouts
+
+- Marginal means for treatment and a contrast for treatment effect with
+  95% CI
