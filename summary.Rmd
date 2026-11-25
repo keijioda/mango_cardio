@@ -484,7 +484,7 @@ plot_waterfall(secondary_bm, ncol = 4)
   * For highly right-skewed outcomes (insulin, HOMA2-IR, 8-iso-PGF2α, and CRP), the median (Q1, Q3) is shown instead of the mean (SD).
   * The baseline table includes all randomized participants (n = 31); 2 withdrew before the end of phase 1 and 1 after phase 1
 
-```{r baseline_descriptive_table}
+```{r baseline_descriptive_table, results = 'asis'}
 
 # Baseline
 baseline <- bm_long %>% filter(visit == 0)
