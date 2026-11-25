@@ -533,7 +533,8 @@ baseline %>%
   tab_footnote(
     footnote  = "ICAM-1 missing for 1 participant (above assay range); n = 30 (15 per sequence).",
     locations = gt::cells_body(columns = label, rows = label == "ICAM-1 (ng/mL)")
-  )
+  )%>% 
+  gt::as_raw_html(inline_css = TRUE)
 
 ```
 
