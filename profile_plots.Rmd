@@ -25,7 +25,8 @@ sapply(pacs, require, character.only = TRUE)
 
 # Read data; n.obs = 231 from 31 distinct partIDs
 # Remove variables that are not needed
-bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+# bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+bm_long <- read_excel("./data/MANCAR_InBody_lab_10302026.xlsx", na = c("", ".")) %>% 
   clean_names() %>% 
   select(-matches("right|left|trunk|arm|leg|cellular|ecw|visceral|impedance|control|score|basal|smi")) %>% 
   rename(

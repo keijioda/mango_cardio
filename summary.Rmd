@@ -23,7 +23,7 @@ sapply(pacs, require, character.only = TRUE)
 
 ## Dataset
 
-* The Excel file `MANCAR_InBody_lab_10132026.xlsx` contains 231 rows from 31 distinct participant IDs (long format, one row per participant per visit). Variables include:
+* The Excel file `MANCAR_InBody_lab_10132026.xlsx` (later corrected in `MANCAR_InBody_lab_10302026.xlsx`) contains 231 rows from 31 distinct participant IDs (long format, one row per participant per visit). Variables include:
   * Participant data:
     * Status: `Finished` or `Dropped`
     * Treatment equence: Control-Mango or Mango-Control
@@ -49,7 +49,8 @@ sapply(pacs, require, character.only = TRUE)
 
 # Read data; n.obs = 231 from 31 distinct partIDs
 # Remove variables that are not needed
-bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+# bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+bm_long <- read_excel("./data/MANCAR_InBody_lab_10302026.xlsx", na = c("", ".")) %>% 
   clean_names() %>% 
   select(-matches("right|left|trunk|arm|leg|cellular|ecw|visceral|impedance|control|score|basal|smi")) %>% 
   rename(
@@ -169,9 +170,10 @@ secondary_bm <- c(
 
 ### Anomalies
 
+* [**Resolved**] The following issue has been resolved with the corrected data: `MANCAR_InBody_lab_10302026.xlsx`
 * The plot below shows visit number against visit date for each participant
   * Visits were approximately evenly spaced. The earliest visit was in October 2024 and the latest in February 2026
-  * One participant (MANCAR28) has visit dates that are out of order relative to visit number:
+  * ~~One participant (MANCAR28) has visit dates that are out of order relative to visit number:~~
 
 ```{r plot_visit_number_date, fig.height = 3, fig.width = 8}
 
@@ -190,21 +192,11 @@ bm_long %>%
   theme_bw()
 ```
 
-* Visit dates for MANCAR28 are out of order:
-  * Visits 0 and 1 are dated Jan–Feb 2026, while visits 2–7 run from Jul to Dec 2025.
-  * The dates appear correct, but the visit numbers seem to be shifted by two?
-    * i.e., labeled visits 2–7 are actually visits 0–5, and labeled visits 0–1 are actually visits 6–7?
-  * To be confirmed with the study team
-
-```{r visit_date_anomalies}
-
-# MANCAR28 visit date
-bm_long %>% 
-  filter(partid == "MANCAR28") %>% 
-  select(partid, seq, visit, trt, date) %>% 
-  knitr::kable()
-
-```
+* ~~Visit dates for MANCAR28 are out of order:~~
+  * ~~Visits 0 and 1 are dated Jan–Feb 2026, while visits 2–7 run from Jul to Dec 2025.~~
+  * ~~The dates appear correct, but the visit numbers seem to be shifted by two?~~
+    * ~~i.e., labeled visits 2–7 are actually visits 0–5, and labeled visits 0–1 are actually visits 6–7?~~
+  * ~~To be confirmed with the study team~~
 
 ### Distribution
 
@@ -264,12 +256,14 @@ bm_long %>%
   
 * [**Check needed**] MANCAR21 (Mango–Control) had a spike in glucose (147 mg/dL) and insulin (119 µIU/mL) at visit 3, suggesting a non-fasting sample
   * HOMA2-IR was not calculated for this visit (insulin above the Oxford calculator's upper limit)
+  * [**Checked**] According to the Research Team, the subject's kcal intake was very low the day prior, which might have lead to rebound hyperglycemia
 
-* [**Check needed**] MANCAR22 (Mango–Control) had the largest drop in glucose from Mango to Control (139 → 94 mg/dL). 
-  * Insulin was consistently high at all visits (38.4–50.7 µIU/mL).
+* [**Check needed**] MANCAR22 (Mango–Control) had the largest drop in glucose from Mango to Control (139 → 94 mg/dL) 
+  * Insulin was consistently high at all visits (38.4–50.7 µIU/mL)
+  * [**Checked**] According to the Research Team, the subject experienced ~7 kg weight loss during the second phase; See the change in fat mass also
 
 * [**Check needed**] MANCAR16 (Control–Mango) showed a steep decline in insulin (10.1 → 2.5 → 2.0 µIU/mL)
-  * HOMA2-IR is missing at visits 3 and 7 because insulin was below the Oxford calculator's lower limit.
+  * HOMA2-IR is missing at visits 3 and 7 because insulin was below the Oxford calculator's lower limit
 
 ```{r profile_plot_glycemic, fig.width = 10, fig.height = 6}
 
@@ -486,19 +480,73 @@ plot_waterfall(secondary_bm, ncol = 4)
     
 ## Descriptive table at baseline
 
-* To be completed
-* Participant characteristics at baseline by treatment sequence:
+* Participant characteristics at baseline, by treatment sequence:
+  * For highly right-skewed outcomes (insulin, HOMA2-IR, 8-iso-PGF2α, and CRP), the median (Q1, Q3) is shown instead of the mean (SD).
+  * The baseline table includes all randomized participants (n = 31); 2 withdrew before the end of phase 1 and 1 after phase 1
+
+```{r baseline_descriptive_table}
+
+# Baseline
+baseline <- bm_long %>% filter(visit == 0)
+
+baseline %>% 
+  mutate(sex = factor(sex, levels = c("F", "M"), labels = c("Female", "Male"))) %>% 
+  select(seq, all_of(demog_vars), all_of(primary_bm), all_of(secondary_bm)) %>% 
+  tbl_summary(
+    by = seq,
+    label = list(
+      sex        ~ "Sex",
+      age        ~ "Age",
+      bmi        ~ "BMI (kg/m²)",
+      glucose    ~ "Fasting glucose (mg/dL)",
+      insulin    ~ "Fasting insulin (µIU/mL)",
+      homair     ~ "HOMA2-IR",
+      a1c        ~ "HgbA1c (%)",
+      chol       ~ "Total cholesterol (mg/dL)",
+      ldl        ~ "LDL-cholesterol (mg/dL)",
+      hdl        ~ "HDL-cholesterol (mg/dL)",
+      trig       ~ "Triglycerides (mg/dL)",
+      oxldl      ~ "Oxidized LDL-C (ng/mL)",
+      isop       ~ "8-iso-PGF2α (ng/mL)",
+      crp        ~ "C-reactive protein (mg/L)",
+      e_selectin ~ "E-selectin (ng/mL)",
+      icam_1     ~ "ICAM-1 (ng/mL)",
+      vcam_1     ~ "VCAM-1 (ng/mL)",
+      pbf        ~ "Percent body fat (%)",
+      bfm        ~ "Body fat mass (kg)",
+      lbm        ~ "Lean body mass (kg)"
+    ),
+    statistic = list(
+      all_continuous() ~ "{mean} ({sd})",
+      c(crp, insulin, homair, isop) ~ "{median} ({p25}, {p75})"
+    ),
+    digits    = list(
+      all_continuous() ~ c(1, 1),
+      c(homair, a1c, isop, crp) ~ c(2, 2)
+    ),
+    missing   = "no"
+  ) %>% 
+  modify_spanning_header(all_stat_cols() ~ "**Treatment sequence**") %>% 
+  add_overall() %>% 
+  bold_labels() %>% 
+  as_gt() %>% 
+  tab_footnote(
+    footnote  = "ICAM-1 missing for 1 participant (above assay range); n = 30 (15 per sequence).",
+    locations = gt::cells_body(columns = label, rows = label == "ICAM-1 (ng/mL)")
+  )
+
+```
 
 ## Linear mixed models
 
 ### Model descriptions
 
-* To be completed
-* A linear mixed model for each outcome
-  * Fixed-effects terms including treatment, sequence and phase
-  * Also includes a random intercept for participant
-  * Adjust for the baseline value of the outcome?
+* A separate linear mixed model was fitted for each outcome:
+  * Fixed effects: treatment (mango vs. control), sequence, phase, and the baseline value of the outcome
+  * Random effect: a random intercept for each participant
+  
+* Skewed outcomes (insulin, HOMA2-IR, triglycerides, 8-iso-PGF2α, and CRP) were analyzed on the log scale.
 
-* Intention-to-treat analysis including dropouts
-
-* Marginal means for treatment and a contrast for treatment effect with 95% CI
+* Estimated marginal (adjusted) means for each treatment and the treatment difference (mango − control),
+  with 95% confidence intervals, were obtained from each model using Kenward–Roger degrees of freedom.
+  * For log-transformed outcomes, estimates were back-transformed and are presented as geometric means and the ratio of geometric means (mango / control).

@@ -7,7 +7,10 @@ pacs <- c(
   "janitor", 
   "readxl",
   "gt",
-  "gtsummary"
+  "gtsummary",
+  "lme4",
+  "lmerTest",
+  "emmeans"
 )
 
 sapply(pacs, require, character.only = TRUE)
@@ -16,7 +19,8 @@ sapply(pacs, require, character.only = TRUE)
 
 # Read data; n.obs = 231 from 31 distinct partIDs
 # Remove variables that are not needed
-bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+# bm_long <- read_excel("./data/MANCAR_InBody_lab_10132026.xlsx", na = c("", ".")) %>% 
+bm_long <- read_excel("./data/MANCAR_InBody_lab_10302026.xlsx", na = c("", ".")) %>% 
   clean_names() %>% 
   select(-matches("right|left|trunk|arm|leg|cellular|ecw|visceral|impedance|control|score|basal|smi")) %>% 
   rename(
@@ -127,6 +131,27 @@ bm_long %>%
 
 # Check distributions -----------------------------------------------------
 
+# Outcome labels
+outcome_labels <- c(
+  glucose    = "Glucose (mg/dL)",
+  insulin    = "Insulin (µIU/mL)",
+  homair     = "HOMA2-IR",
+  a1c        = "HbA1c (%)",
+  chol       = "Total chol (mg/dL)",
+  ldl        = "LDL-C (mg/dL)",
+  hdl        = "HDL-C (mg/dL)",
+  trig       = "TG (mg/dL)",
+  oxldl      = "Ox-LDL (ng/mL)",
+  isop       = "8-iso-PGF2α (ng/mL)",
+  crp        = "CRP (mg/L)",
+  e_selectin = "E-selectin (ng/mL)",
+  icam_1     = "ICAM-1 (ng/mL)",
+  vcam_1     = "VCAM-1 (ng/mL)",
+  pbf        = "Body fat (%)",
+  bfm        = "Fat mass (kg)",
+  lbm        = "Lean mass (kg)"
+)
+
 # Histogram for all primary & secondary outcomes
 bm_long %>% 
   filter(visit %in% c(0, 3, 7)) %>% 
@@ -145,15 +170,6 @@ bm_long %>%
   summarise(across(where(is.numeric), \(x) moments::skewness(x, na.rm = TRUE))) %>% 
   pivot_longer(cols = everything(), names_to = "Variable", values_to = "Skewness")
 
-bm_long %>%
-  # filter(insulin > 100) %>% 
-  filter(partid == "MANCAR21", visit %in% c(0, 3, 7)) %>% 
-  select(partid, visit, trt, glucose, insulin, homair, a1c)
-
-bm_long %>%
-  filter(glucose > 150) %>%
-  # filter(partid == "MANCAR21", visit %in% c(0, 3, 7)) %>% 
-  select(partid, visit, trt, glucose, insulin, homair, a1c)
 
 # Descriptive tables ------------------------------------------------------
 
@@ -218,27 +234,6 @@ bm_long %>%
   theme(legend.position = "bottom")
 
 # Profile plots
-# Outcome labels
-outcome_labels <- c(
-  glucose    = "Glucose (mg/dL)",
-  insulin    = "Insulin (µIU/mL)",
-  homair     = "HOMA2-IR",
-  a1c        = "HbA1c (%)",
-  chol       = "Total chol (mg/dL)",
-  ldl        = "LDL-C (mg/dL)",
-  hdl        = "HDL-C (mg/dL)",
-  trig       = "TG (mg/dL)",
-  oxldl      = "Ox-LDL (ng/mL)",
-  isop       = "8-iso-PGF2α (ng/mL)",
-  crp        = "CRP (mg/L)",
-  e_selectin = "E-selectin (ng/mL)",
-  icam_1     = "ICAM-1 (ng/mL)",
-  vcam_1     = "VCAM-1 (ng/mL)",
-  pbf        = "Body fat (%)",
-  bfm        = "Fat mass (kg)",
-  lbm        = "Lean mass (kg)"
-)
-
 plot_profile <- function(data, var, ylab = outcome_labels[[var]], log = FALSE) {
   p <- data %>%
     filter(visit %in% c(0, 3, 7), !is.na(.data[[var]])) %>%
@@ -272,7 +267,7 @@ plot_profile(bm_long, "oxldl") + plot_profile(bm_long, "isop", log = TRUE)
 
 # Profile plots for body composition
 (plot_profile(bm_long, "pbf") + plot_profile(bm_long, "bfm")) /
-plot_profile(bm_long, "lbm")
+(plot_profile(bm_long, "lbm") + plot_spacer())
 
 # plotly version of the profile plot
 library(plotly)
@@ -356,3 +351,154 @@ plot_waterfall <- function(vars, ncol = 4) {
 }
 plot_waterfall(primary_bm, ncol = 4)
 plot_waterfall(secondary_bm, ncol = 4)
+
+
+# Linear mixed models -----------------------------------------------------
+
+bm_long_lme <- bm_long %>% filter(visit %in% c(3,7))
+
+# Test on glucose  
+fit <- lmer(glucose ~ trt + seq + phase + (1|partid), data = bm_long_lme) 
+summary(fit, ddf = "Kenward-Roger")
+
+# Adjusted means
+emm <- emmeans(fit, ~ trt, lmer.df = "kenward-roger")
+contrast(emm, method = "trt.vs.ctrl", ref = "Control") %>% confint()
+
+
+tibble(fitted = fitted(fit), resid = residuals(fit, type = "pearson")) %>% 
+  ggplot(aes(x = fitted, y = resid)) +
+  geom_hline(yintercept = 0, linetype = "dashed") +
+  geom_point() +
+  geom_smooth(se = FALSE, method = "loess") +
+  labs(
+    title = "Residuals vs fitted",
+    x = "Fitted",
+    y = "Pearson residual"
+  )
+
+tibble(fitted = fitted(fit), resid = residuals(fit, type = "pearson")) %>% 
+  ggplot(aes(sample = resid)) +
+  stat_qq() +
+  stat_qq_line() +
+  labs(
+    title = "Q-Q: residuals",
+    x = "Theoretical",
+    y = "Sample"
+  )
+
+# Run lmer for all outcome
+# Adjust for the baseline value
+log_vars <- c("insulin", "homair", "trig", "isop", "crp")
+
+fit_lmer <- function(var) {
+  is_log <- var %in% log_vars
+  bl <- bm_long %>% filter(visit == 0) %>% select(partid, bl = all_of(var))
+  d <- bm_long %>%
+    filter(visit %in% c(3, 7)) %>%
+    select(partid, seq, phase, trt, y = all_of(var)) %>%
+    left_join(bl, by = "partid") %>%
+    filter(!is.na(y), !is.na(bl)) %>%
+    droplevels() %>%
+    mutate(trt  = relevel(trt, ref = "Control"),
+           bl_c = if (is_log) log(bl) - mean(log(bl)) else bl - mean(bl))
+  f <- if (is_log) {
+    log(y) ~ trt + phase + seq + bl_c + (1 | partid)
+  } else {
+    y ~ trt + phase + seq + bl_c + (1 | partid)
+  }
+  lmer(f, data = d)
+}
+
+fits <- map(set_names(c(primary_bm, secondary_bm)), fit_lmer)
+
+# Function to get emmeans
+summarize_fit <- function(fit, var) {
+  is_log <- var %in% log_vars
+  type   <- if (is_log) "response" else "link"     # back-transform log outcomes
+  
+  emm <- emmeans(fit, ~ trt, lmer.df = "kenward-roger")
+  m   <- summary(emm, type = type) %>% as_tibble()
+  k   <- contrast(emm, method = "trt.vs.ctrl", ref = "Control") %>%
+    summary(infer = TRUE, type = type) %>% as_tibble()
+  
+  ctl <- m %>% filter(trt == "Control")
+  mng <- m %>% filter(trt == "Mango")
+  
+  tibble(
+    outcome = var,
+    scale   = if (is_log) "ratio" else "difference",
+    n       = n_distinct(fit@frame$partid),
+    c_est = ctl[[2]], c_lo = ctl$lower.CL, c_hi = ctl$upper.CL,
+    m_est = mng[[2]], m_lo = mng$lower.CL, m_hi = mng$upper.CL,
+    d_est = k[[2]],   d_lo = k$lower.CL,   d_hi = k$upper.CL,
+    p     = k$p.value
+  )
+}
+
+results <- imap_dfr(fits, summarize_fit)
+
+fmt_ci <- function(est, lo, hi, dg) sprintf("%.*f (%.*f, %.*f)", dg, est, dg, lo, dg, hi)
+digits_map <- c(a1c = 2, homair = 2, isop = 2, crp = 2)
+
+library(gt)
+results %>%
+  mutate(
+    dg      = coalesce(unname(digits_map[outcome]), 1),
+    label   = unname(outcome_labels[outcome]),
+    Control = fmt_ci(c_est, c_lo, c_hi, dg),
+    Mango   = fmt_ci(m_est, m_lo, m_hi, dg),
+    Effect  = fmt_ci(d_est, d_lo, d_hi, if_else(scale == "ratio", 2, dg)),
+    p       = gtsummary::style_pvalue(p, digits = 2),
+    group   = if_else(outcome %in% primary_bm, "Primary outcomes", "Secondary outcomes")
+  ) %>%
+  # select(group, label, scale, n, Control, Mango, Effect, p) %>%
+  select(group, label, scale, Control, Mango, Effect, p) %>%
+  gt(groupname_col = "group") %>%
+  cols_hide(scale) %>%
+  cols_label(label   = "Outcome",
+             Control = "Control, mean (95% CI)",
+             Mango   = "Mango, mean (95% CI)",
+             Effect  = "Mango − Control (95% CI)",
+             p       = "p-value") %>%
+  tab_footnote(
+    footnote  = "Analyzed on the log scale; geometric means and ratio (Mango / Control) shown.",
+    locations = cells_body(columns = label, rows = scale == "ratio")
+  ) %>%
+  tab_source_note("Estimated marginal means from linear mixed models with diet, phase, sequence, and baseline value as fixed effects and a random intercept for participant; Kenward–Roger degrees of freedom.") %>%
+  tab_source_note("p-values are not adjusted for multiple comparisons.")
+
+# Function for diagnostic plots
+diagnostics_plots <- function(fit, var, n_label = 3) {
+  d <- fit@frame %>%                                   # data actually used by the model
+    mutate(fitted = fitted(fit),
+           resid  = residuals(fit, type = "pearson"),
+           partid = as.character(partid),
+           label  = paste0(parse_number(partid), "-", if_else(trt == "Mango", "M", "C")))
+  top <- d %>% slice_max(abs(resid), n = n_label)
+  
+  re <- ranef(fit)$partid %>% rownames_to_column("partid") %>% rename(b = `(Intercept)`)
+  
+  p1 <- ggplot(d, aes(fitted, resid)) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_point() + geom_smooth(se = FALSE, method = "loess", formula = y ~ x) +
+    ggrepel::geom_text_repel(data = top, aes(label = label), size = 3) +
+    labs(title = "Residuals vs fitted", x = "Fitted", y = "Pearson residual")
+  
+  p2 <- ggplot(d, aes(sample = resid)) + stat_qq() + stat_qq_line() +
+    labs(title = "Q-Q: residuals", x = "Theoretical", y = "Sample")
+  
+  p3 <- ggplot(re, aes(sample = b)) + stat_qq() + stat_qq_line() +
+    labs(title = "Q-Q: random intercepts", x = "Theoretical", y = "Sample")
+  
+  p4 <- ggplot(d, aes(trt, resid)) +
+    geom_hline(yintercept = 0, linetype = "dashed") +
+    geom_boxplot(outlier.shape = NA) + geom_jitter(width = 0.1) +
+    labs(title = "Residuals by diet", x = NULL, y = "Pearson residual")
+  
+  (p1 + p2) / (p3 + p4) +
+    plot_annotation(title = paste0(outcome_labels[[var]],
+                                   if (var %in% log_vars) " (log scale)" else "")) & theme_bw()
+}
+
+iwalk(fits, \(fit, v) print(diagnostics_plots(fit, v)))
